@@ -4,7 +4,7 @@ const app = express();
 
 
 app.get("/user", (req,res) =>{
-    res.send({name: "John", age: 30});
+    res.send({name: "John", age: 30}, {name: "Jane", age: 25}), {name: "Doe", age: 40};
 })
 
 app.post("/user", (req,res)=>{
