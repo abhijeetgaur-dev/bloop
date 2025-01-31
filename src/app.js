@@ -11,14 +11,6 @@ app.post("/user", (req,res)=>{
     res.send("user added");
 })
 
-app.delete("/user", (req,res) =>{
-    res.send('User deleted');
-})
-
-app.use("/test", (req,res) =>{
-    res.send('Hello Test')
-})
-
 
 
 app.use("/",(req,res) =>{
