@@ -53,10 +53,6 @@ app.delete("/users/:id", (req, res) => {
     res.json(deletedUser);
 });
 
-// Default route
-app.use("/", (req, res) => {
-    res.send("Hello World");
-});
 
 // Start server
 app.listen(3000, () => {
