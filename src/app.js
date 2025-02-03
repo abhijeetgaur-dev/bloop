@@ -1,19 +1,8 @@
 const express = require("express");
 const app = express();
+const {auth} = require("./middleware/auth")
 
-app.use("/", (req,res,next)=>{
-    
-    const token  = "xyzqteyueu";
-    const isAdminAuthorized = "xyz" === token;
-    if(!isAdminAuthorized){
-        res.send("Unauthorized Request");
-    }
-    else{
-        next();
-    }
-    console.log("Handling Auth");
-
-})
+app.use("/", auth);
 
 app.get("/user/add", (req,res) =>{
     console.log("Handling /user/add route");
