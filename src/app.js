@@ -1,10 +1,10 @@
 const express = require("express");
 const app = express();
-const {auth} = require("./middleware/auth")
+const {auth, userAuth} = require("./middleware/auth")
 
 app.use("/", auth);
 
-app.get("/user/add", (req,res) =>{
+app.get("/user/add", userAuth, (req,res) =>{
     console.log("Handling /user/add route");
     res.send("New User added");
 })
