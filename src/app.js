@@ -1,19 +1,17 @@
 const express = require("express");
 const app = express();
-const {auth, userAuth} = require("./middleware/auth")
+const {connectDB} = require("./config/database")
+// const {auth, userAuth} = require("./middleware/auth")
 
-app.use("/", auth);
+connectDB()
+    .then(()=>{
+        console.log("Database Successfully connected");
+        app.listen(7777, () => {
+            console.log("Listening on port 7777");
+        });
+    })
+    .catch((err)=>{
+        console.log(err);
+    });
 
-app.get("/user/add", userAuth, (req,res) =>{
-    console.log("Handling /user/add route");
-    res.send("New User added");
-})
 
-app.get("/user/delete", (req,res)=>{
-    console.log("Handling /user/add route");
-    res.send("User Deleted");
-})
-
-app.listen(7777, () => {
-    console.log("Listening on port 7777");
-});
