@@ -25,7 +25,7 @@ connectDB()
         });
     })
     .catch((err)=>{
-        console.log(err);
+        console.log("Cannot connect" + err.message);
     });
 
 
