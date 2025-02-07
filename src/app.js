@@ -7,7 +7,7 @@ const User  = require("./models/user")
 app.use(express.json());
 
 //implementing email search feature
-app.get("/search-user", async (req,res) =>{
+app.get("/user", async (req,res) =>{
     
     try{
         const userData = await User.find({emailId : req.body.email});
@@ -31,7 +31,7 @@ app.get("/feed" , async (req,res)=>{
 })
 
 
-app.post("/signup" , async (req,res)=>{
+app.post("/user" , async (req,res)=>{
     const user = new User (req.body);
     try{        
         await user.save();
@@ -41,6 +41,29 @@ app.post("/signup" , async (req,res)=>{
         res.status(400).send("Error sending data : " + err.message);
     }
 })
+
+app.patch("/user", async (req,res) =>{
+    const id = req.body.id;
+
+    try{
+        await User.findByIdAndUpdate({_id : id}, req.body);
+        res.send("user update successfully!" + await User.findById(id))
+    }
+    catch{
+        res.send("Something Went Wrong! Please help!");
+    }
+})
+
+app.delete("/user", async (req, res) =>{
+    try{
+        await User.findByIdAndDelete(req.body.id);
+        res.send("User deleted successfully");
+    }
+    catch{
+        res.send("Something Went Wrong!");
+    }
+})
+
 
 connectDB()
     .then(()=>{
