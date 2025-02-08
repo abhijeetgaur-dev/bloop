@@ -3,22 +3,43 @@ const {Schema, model} = mongoose;
 
 const userSchema = new Schema ({
     firstName:{
-        type: "string"
+        type: String,
+        required: true
     },
     lastName:{
-        type: "string"
+        type: String,
     },
     emailId:{
-        type: "string"
+        type: String,
+        unique : true,
+        required : true,
+        lowercase : true,
+        trim :true,
     },
     password :{
-        type: "string"
+        type: String,
+        required: true
     },
     age : {
-        type: "number"
+        type: Number,
+        min: 18
     },
     gender: {
-        type: "string"
+        type: String,
+        validate(value){
+            if(!["male", "female", "others"].includes(value)){
+                throw new Error(" Gender data not valid");
+            }
+        }
+    },
+    about :{
+        type: String,
+        default: "default bio"
+    },
+    photoUrl : {
+        type: String,
+        default: "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"
+
     }
 });
 

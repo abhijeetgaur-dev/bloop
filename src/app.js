@@ -46,7 +46,7 @@ app.patch("/user", async (req,res) =>{
     const id = req.body.id;
 
     try{
-        await User.findByIdAndUpdate({_id : id}, req.body);
+        await User.findByIdAndUpdate({_id : id}, req.body, {runValidators: true});
         res.send("user update successfully!" + await User.findById(id))
     }
     catch{
