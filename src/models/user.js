@@ -40,6 +40,9 @@ const userSchema = new Schema ({
         type: String,
         default: "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"
 
+    },
+    skills :{
+        type: [String]
     }
 });
 
