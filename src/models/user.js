@@ -44,7 +44,11 @@ const userSchema = new Schema ({
     skills :{
         type: [String]
     }
-});
+    },
+    {
+      timestamps : true 
+    }
+);
 
 const UserModel = model("user", userSchema);
 
