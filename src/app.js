@@ -57,12 +57,16 @@ app.patch("/user/:id", async (req,res) =>{
         if(!isUpdateAllowed){
             throw new Error("Update not Allowed");
         }
+        
+        if(data?.skills.length > 5 ){
+            throw new Error("Enter skills less than 5")
+        }
     
         await User.findByIdAndUpdate({_id : id}, data, {runValidators: true});
         res.send("user update successfully!" + await User.findById(id))
     }
     catch(err){
-        res.send("Something Went Wrong! Please help!" + err);
+        res.status(400).send("UPDATE FAILED " + err);
     }
 })
 
