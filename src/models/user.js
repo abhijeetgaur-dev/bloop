@@ -24,7 +24,12 @@ const userSchema = new Schema ({
     },
     password :{
         type: String,
-        required: true
+        required: true,
+				validate(value){
+					if(!validator.isStrongPassword(value)){
+						throw new Error("Enter strong password");
+				}
+			}
     },
     age : {
         type: Number,
@@ -47,7 +52,7 @@ const userSchema = new Schema ({
         default: "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg",
 				validate(value){
 					if(!validator.isURL(value)){
-						throw new Error("Enter valid URL " +value);
+						throw new Error("Enter valid URL " +value)
 					}
 				}
 
