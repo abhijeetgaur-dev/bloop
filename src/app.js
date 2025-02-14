@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const {connectDB} = require("./config/database")
 const User  = require("./models/user")
+const {validateSignupData} = require("./utils/validation")
+const bcrypt = require("bcrypt");
 // const {auth, userAuth} = require("./middlewares/auth")
 
 app.use(express.json());
@@ -32,13 +34,30 @@ app.get("/feed" , async (req,res)=>{
 
 
 app.post("/user" , async (req,res)=>{
-    const user = new User (req.body);
-    try{        
-        await user.save();
-        res.send("user added successfully");
+    try{
+    //validation of Data
+    validateSignupData(req);
+
+    const {firstName, lastName ,emailId, password} = req.body;
+    //encryption of password
+    const hashPassword = await bcrypt.hash(password, 10);
+    console.log(hashPassword);
+    
+
+    //creating a new instance of User model
+    const user = new User ({
+      firstName, 
+      emailId, 
+      password : hashPassword,
+      lastName} );
+
+    //saving the user
+    await user.save();
+    res.send("user added successfully");
+
     }
     catch(err){
-        res.status(400).send("Error sending data : " + err.message);
+        res.status(400).send("ERROR : " + err.message);
     }
 })
 
