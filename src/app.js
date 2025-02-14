@@ -16,16 +16,20 @@ app.get("/login", async (req, res) =>{
     const user =  await User.findOne({emailId : email});
       
       if(!user){
-        throw new Error ("invalid email");
+        throw new Error ("Invalid Credentials");
       }
 
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if(!isPasswordValid){
-        throw new Error ("Invalid pass");
+        throw new Error ("Invalid Credentials");
+      }
+      else{
+        res.cookie("token" , "678241iuhafdjky89r234iju");
+        res.send("login successfull");
       }
 
-      res.send("login successfull");
+      
   }
   catch(err){
     res.send("Something went wrong " + err.message);
