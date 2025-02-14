@@ -4,9 +4,34 @@ const {connectDB} = require("./config/database")
 const User  = require("./models/user")
 const {validateSignupData} = require("./utils/validation")
 const bcrypt = require("bcrypt");
+const { default: isEmail } = require("validator/lib/isEmail");
 // const {auth, userAuth} = require("./middlewares/auth")
 
 app.use(express.json());
+
+app.get("/login", async (req, res) =>{
+  const {email, password} =  req.body;
+
+  try{
+    const user =  await User.findOne({emailId : email});
+      
+      if(!user){
+        throw new Error ("invalid email");
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if(!isPasswordValid){
+        throw new Error ("Invalid pass");
+      }
+
+      res.send("login successfull");
+  }
+  catch(err){
+    res.send("Something went wrong " + err.message);
+  }
+
+})
 
 //implementing email search feature
 app.get("/user", async (req,res) =>{
