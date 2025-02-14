@@ -5,9 +5,12 @@ const User  = require("./models/user")
 const {validateSignupData} = require("./utils/validation")
 const bcrypt = require("bcrypt");
 const { default: isEmail } = require("validator/lib/isEmail");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 // const {auth, userAuth} = require("./middlewares/auth")
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/login", async (req, res) =>{
   const {email, password} =  req.body;
@@ -25,17 +28,39 @@ app.get("/login", async (req, res) =>{
         throw new Error ("Invalid Credentials");
       }
       else{
-        res.cookie("token" , "678241iuhafdjky89r234iju");
+        const token = await jwt.sign({_id: user._id}, "BLoop13%9")
+
+        res.cookie("token" , token);
         res.send("login successfull");
       }
-
       
   }
   catch(err){
     res.send("Something went wrong " + err.message);
   }
 
-})
+});
+
+
+app.get("/profile" ,async (req,res) =>{
+    const cookies = req.cookies;
+    const {token} = cookies;
+
+    const tokenValue = await jwt.verify(token , "BLoop13%9");
+    console.log(tokenValue);
+
+    if(!tokenValue){
+        throw new Error ("Invalid Token")
+    }
+    const user = await User.findOne({_id : tokenValue});
+
+    if(!user){
+        throw new Error ("User not found!")
+    }
+    
+    res.send(user);
+});
+
 
 //implementing email search feature
 app.get("/user", async (req,res) =>{
@@ -48,7 +73,7 @@ app.get("/user", async (req,res) =>{
         res.send("Something went wrong " + err.message);
     }
 
-})
+});
 
 //implementing feed API
 app.get("/feed" , async (req,res)=>{
@@ -59,10 +84,10 @@ app.get("/feed" , async (req,res)=>{
     catch(err){
         res.status(404).send("Something went wrong" + err.message);
     }
-})
+});
 
 
-app.post("/user" , async (req,res)=>{
+app.post("/signup" , async (req,res)=>{
     try{
     //validation of Data
     validateSignupData(req);
@@ -88,7 +113,7 @@ app.post("/user" , async (req,res)=>{
     catch(err){
         res.status(400).send("ERROR : " + err.message);
     }
-})
+});
 
 app.patch("/user/:id", async (req,res) =>{
     const id = req.params?.id;
@@ -116,7 +141,7 @@ app.patch("/user/:id", async (req,res) =>{
     catch(err){
         res.status(400).send("UPDATE FAILED " + err);
     }
-})
+});
 
 app.delete("/user", async (req, res) =>{
     try{
@@ -126,7 +151,7 @@ app.delete("/user", async (req, res) =>{
     catch{
         res.send("Something Went Wrong!");
     }
-})
+});
 
 
 connectDB()
