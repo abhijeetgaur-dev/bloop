@@ -7,32 +7,32 @@ const bcrypt = require("bcrypt");
 const { default: isEmail } = require("validator/lib/isEmail");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
-// const {auth, userAuth} = require("./middlewares/auth")
+const {loginAuth} = require("./middlewares/auth")
 
 app.use(express.json());
 app.use(cookieParser());
 
 app.get("/login", async (req, res) =>{
-  const {email, password} =  req.body;
 
   try{
-    const user =  await User.findOne({emailId : email});
-      
-      if(!user){
+    const {email, password} = req.body;
+    const user = await User.findOne({emailId : email});
+    console.log(user)
+
+    if(!user){
+        throw new Error ("Invalid Credentials!");
+    }
+
+    checkPass = await bcrypt.compare(password , user.password);
+
+    if(!checkPass){
         throw new Error ("Invalid Credentials");
-      }
-
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-
-      if(!isPasswordValid){
-        throw new Error ("Invalid Credentials");
-      }
-      else{
-        const token = await jwt.sign({_id: user._id}, "BLoop13%9")
-
-        res.cookie("token" , token);
-        res.send("login successfull");
-      }
+    }
+    else{
+        const token = await jwt.sign({_id : user._id}, "BLoop13%9");
+        res.cookie("token", token )
+    }
+    res.send("Login Successful");
       
   }
   catch(err){
@@ -42,23 +42,15 @@ app.get("/login", async (req, res) =>{
 });
 
 
-app.get("/profile" ,async (req,res) =>{
-    const cookies = req.cookies;
-    const {token} = cookies;
-
-    const tokenValue = await jwt.verify(token , "BLoop13%9");
-    console.log(tokenValue);
-
-    if(!tokenValue){
-        throw new Error ("Invalid Token")
+app.get("/profile",loginAuth ,async (req,res) =>{
+    try{
+        const user = req.user;
+        res.send(user);
     }
-    const user = await User.findOne({_id : tokenValue});
-
-    if(!user){
-        throw new Error ("User not found!")
+    catch(err){
+        res.send("Something went wrong " + err.message);
     }
-    
-    res.send(user);
+
 });
 
 
