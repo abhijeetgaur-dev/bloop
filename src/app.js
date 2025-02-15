@@ -3,10 +3,10 @@ const app = express();
 const {connectDB} = require("./config/database")
 const User  = require("./models/user")
 const {validateSignupData} = require("./utils/validation")
-const bcrypt = require("bcrypt");
+
 const { default: isEmail } = require("validator/lib/isEmail");
 const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
+
 const {loginAuth} = require("./middlewares/auth")
 
 app.use(express.json());
@@ -23,13 +23,14 @@ app.get("/login", async (req, res) =>{
         throw new Error ("Invalid Credentials!");
     }
 
-    checkPass = await bcrypt.compare(password , user.password);
+    checkPass = await user.validatePass(password);
 
     if(!checkPass){
         throw new Error ("Invalid Credentials");
     }
     else{
-        const token = await jwt.sign({_id : user._id}, "BLoop13%9");
+        const token = await user.getJWT();
+
         res.cookie("token", token )
     }
     res.send("Login Successful");
