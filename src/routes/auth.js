@@ -1,6 +1,6 @@
 const express = require("express")
 const User = require("../models/user")
-const validateSignupData = require("../utils/validation")
+const {validateSignupData} = require("../utils/validation")
 const bcrypt = require("bcrypt")
 
 const authRouter =  express.Router();
@@ -37,8 +37,8 @@ authRouter.post("/signup" , async (req,res)=>{
 authRouter.get("/login", async (req, res) =>{
 
 try{
-    const {email, password} = req.body;
-    const user = await User.findOne({emailId : email});
+    const {emailId, password} = req.body;
+    const user = await User.findOne({emailId : emailId});
 
 
     if(!user){
