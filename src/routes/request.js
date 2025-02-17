@@ -14,7 +14,25 @@ requestRouter.post("/request/send/:status/:userId", loginAuth,async (req, res) =
     const isStatusValid = ["ignored", "interested"];
     
     if(!isStatusValid.includes(status)){
-      throw new Error ("Invalid Status");
+      return res.status(400)
+      .json({messsage : "INVALID STATUS : " + status})
+    }
+
+    //check for dupicate connection request
+    const isConnectionRequestDupicate = ConnectionRequest.findOne({
+      $or:[
+        {fromUserId,toUserId},
+        {
+          fromUserId: toUserId,
+          toUSerId: fromUserId
+        }
+      ]
+    });
+
+    if(isConnectionRequestDupicate){
+      return res
+            .status(400)
+            .json({message : "DUPLICATE CONNECTION REQUEST"});
     }
 
     const connectionRequest = new ConnectionRequest({
