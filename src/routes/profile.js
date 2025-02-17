@@ -1,7 +1,7 @@
-const express = require("express")
-const {loginAuth} = require("../middlewares/auth")
-const {validateEditProfileData} = require("../utils/validation")
-
+const express = require("express");
+const {loginAuth} = require("../middlewares/auth");
+const {validateEditProfileData, validateEditPasswordData} = require("../utils/validation");
+const bcrypt = require("bcrypt");
 
 const profileRouter = express.Router();
 
@@ -30,7 +30,7 @@ profileRouter.patch("/profile/edit", loginAuth, async (req, res) =>{
     })
 
     await loggedInUser.save();
-    
+
     res.send(`${loggedInUser.firstName} your was updated successfully!`);
   }
   catch(err){
@@ -38,4 +38,21 @@ profileRouter.patch("/profile/edit", loginAuth, async (req, res) =>{
   }
 })
 
+profileRouter.patch("/profile/password", loginAuth, async (req, res) =>{
+  try{
+    const loggedInUser = req.user;
+    const {password} = req.body;
+    validateEditPasswordData(password);
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    loggedInUser.password = hashPassword;
+    
+    await loggedInUser.save()
+    res.send("password updated successfully!")
+
+  }
+  catch(err){
+    res.status(400).send("Something Went Wrong " + err);
+  }
+})
 module.exports = profileRouter;

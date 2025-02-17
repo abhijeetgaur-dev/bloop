@@ -1,5 +1,6 @@
 const validator = require("validator");
 
+
 const validateSignupData = (req) => {
   const {firstName, lastName, emailId ,password} = req.body;
 
@@ -24,7 +25,21 @@ const validateEditProfileData = (req) =>{
   return isValidRequest;
 }
 
+const validateEditPasswordData = (password) =>{
+
+  if(!password){
+    throw new Error ("Pass Not Provided");
+  }
+
+  if(!validator.isStrongPassword(password)){
+    throw new Error ("Pass not strong enough!");
+  }
+  
+}
+
+
 module.exports = {
   validateSignupData,
-  validateEditProfileData
+  validateEditProfileData,
+  validateEditPasswordData
 };
