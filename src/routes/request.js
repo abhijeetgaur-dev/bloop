@@ -1,5 +1,7 @@
+const mongoose= require("mongoose");
 const { loginAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connectionRequest")
+const User = require("../models/user")
 
 const express = require("express")
 
@@ -11,6 +13,15 @@ requestRouter.post("/request/send/:status/:userId", loginAuth,async (req, res) =
     const toUserId = req.params.userId;
     const status = req.params.status;
   
+    //is to user Valid?
+    const isToUserIdValid = await User.findById(toUserId);
+
+    if(!isToUserIdValid){
+      return res
+            .status(400)
+            .json({message: "INVALID USER ID"});
+    }
+
     const isStatusValid = ["ignored", "interested"];
     
     if(!isStatusValid.includes(status)){
