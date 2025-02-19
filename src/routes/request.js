@@ -30,12 +30,12 @@ requestRouter.post("/request/send/:status/:userId", loginAuth,async (req, res) =
     }
 
     //check for dupicate connection request
-    const isConnectionRequestDupicate = ConnectionRequest.findOne({
+    const isConnectionRequestDupicate = await ConnectionRequest.findOne({
       $or:[
         {fromUserId,toUserId},
         {
           fromUserId: toUserId,
-          toUSerId: fromUserId
+          toUserId: fromUserId
         }
       ]
     });
@@ -63,5 +63,52 @@ requestRouter.post("/request/send/:status/:userId", loginAuth,async (req, res) =
     res.send("Something Went Wrong! " + err);
   }
 })
+
+requestRouter.post("/request/review/:status/:requestId", loginAuth, async(req,res)=>{
+ try{
+    const allowedStatus = ["accepted" , "rejected"];
+    const status = req.params.status;
+    const requestId = req.params.requestId;
+    const loggedInUserId = req.user._id;
+
+
+    if(!allowedStatus.includes(status)){
+      res
+        .status(400)
+        .json({message : "Invalid Status Type!"});
+    }
+
+    //checking if the request id is valid
+    const findUserConnection = await User.findById(requestId);
+
+    if(!findUserConnection){
+      res.status(400)
+      .json({message : "Invalid Request ID!"})
+    }
+
+    //getting the request
+    const connection = await ConnectionRequest.findOne({fromUserId: requestId, toUserId: loggedInUserId, status: "interested" });
+
+    if(!connection){
+      res.
+        status(400).
+        json({message : "Conection Not Found"});
+    }
+
+    connection.status = status;
+
+    const data = await connection.save();
+    
+    res.json( {message : data});
+
+
+ }
+ catch(err){
+  res.send("Something Went Wrong!" + err);
+ }
+ 
+  
+})
+
 
 module.exports = requestRouter;
