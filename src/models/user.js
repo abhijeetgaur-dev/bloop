@@ -86,6 +86,6 @@ userSchema.methods.validatePass = async function(password){
 }
 
 
-const UserModel = model("User", userSchema);
+const User = model("User", userSchema);
 
-module.exports = UserModel;
+module.exports = User;
