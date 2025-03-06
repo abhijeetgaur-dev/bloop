@@ -64,7 +64,7 @@ const userSchema = new Schema ({
 
     },
     skills :{
-        type: [String]
+        type: [String],
     }
     },
     {
