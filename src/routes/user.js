@@ -48,6 +48,12 @@ userRouter.get("/user/connections", loginAuth, async (req,res)=>{
 
 userRouter.get("/user/feed", loginAuth, async (req,res)=>{
   try{
+    let page = parseInt(req.query.page);
+    page = page < 0 ? 0 : page;
+    let limit = parseInt(req.query.limit);
+    limit = limit > 50 ? 50 : limit;
+    const skip = (page-1)* limit;
+
     const loggedInUser = req.user;
     const users= await User.find();
     const data = await ConnectionRequest.find({
@@ -56,19 +62,22 @@ userRouter.get("/user/feed", loginAuth, async (req,res)=>{
         {toUserId : loggedInUser._id}
       ]
     })
+
     const blockedUsers = new Set();
     
     data.forEach((connection) =>{
-      blockedUsers.add(data.fromUserId);
-      blockedUsers.add(data.toUserId);
+      blockedUsers.add(connection.fromUserId.toString());
+      blockedUsers.add(connection.toUserId.toString());
     })
 
-    const feedData = await 
-
-
+    const feedData = await User.find({
+      _id : {$nin: Array.from(blockedUsers) }
+    }).select("firstName lastName photoUrl age gender about skills")
+    .skip(skip).limit(limit);
 
 
     res.send(feedData);
+
   }catch(err){
     res.status(400).send("Error : "+err);
   }
