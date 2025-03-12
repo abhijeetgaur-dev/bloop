@@ -8,12 +8,14 @@ const userRouter = express.Router();
 userRouter.get("/user/requests/recieved",loginAuth ,async (req,res)=>{
   const user = req.user;
     try{
-      const allrequests =  await ConnectionRequest.find({
+      const connectionRequests =  await ConnectionRequest.find({
         toUserId : user._id,
         status: "interested",
       }).populate("fromUserId","firstName lastName photoUrl age gender about skills")
       
-      res.send(allrequests);
+      res.status(200).json({
+        message : "request Successfull" , 
+        data :connectionRequests});
 
     }catch(err){
       res.status(400).send("Something Went Wrong : "+err);
@@ -39,7 +41,7 @@ userRouter.get("/user/connections", loginAuth, async (req,res)=>{
           return row.fromUserId;
       })
       
-      res.send(data);
+      res.status(200).json({message : "Connections retrieved successfully", data : data });
 
     }catch(err){
       res.status(400).send("ERR occured :" + err);
@@ -48,10 +50,10 @@ userRouter.get("/user/connections", loginAuth, async (req,res)=>{
 
 userRouter.get("/user/feed", loginAuth, async (req,res)=>{
   try{
-    let page = parseInt(req.query.page);
+    let page = parseInt(req.query.page) || 1;
     page = page < 0 ? 0 : page;
     let limit = parseInt(req.query.limit);
-    limit = limit > 50 ? 50 : limit;
+    limit = limit > 50 ? 50 : limit || 10;
     const skip = (page-1)* limit;
 
     const loggedInUser = req.user;
@@ -61,7 +63,7 @@ userRouter.get("/user/feed", loginAuth, async (req,res)=>{
         {fromUserId : loggedInUser._id},
         {toUserId : loggedInUser._id}
       ]
-    })
+    }).select("fromUserId toUserId")
 
     const blockedUsers = new Set();
     
@@ -71,15 +73,22 @@ userRouter.get("/user/feed", loginAuth, async (req,res)=>{
     })
 
     const feedData = await User.find({
-      _id : {$nin: Array.from(blockedUsers) }
-    }).select("firstName lastName photoUrl age gender about skills")
-    .skip(skip).limit(limit);
+      $and: [
+        {_id : {$nin: Array.from(blockedUsers) }},
+        {_id : {$ne: loggedInUser._id }},
+      ],
+    })
+    .select("firstName lastName photoUrl age gender about skills")
+    .skip(skip)
+    .limit(limit);
 
 
-    res.send(feedData);
+    res.json({ data: feedData });
 
   }catch(err){
     res.status(400).send("Error : "+err);
   }
 })
+
+
 module.exports = userRouter;

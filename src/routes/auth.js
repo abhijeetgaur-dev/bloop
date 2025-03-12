@@ -10,27 +10,25 @@ authRouter.post("/signup" , async (req,res)=>{
   //validation of Data
   validateSignupData(req);
 
-  const {firstName, lastName ,emailId, password, skills, age, gender, about} = req.body;
+  const {firstName, lastName ,emailId, password} = req.body;
   //encryption of password
   const hashPassword = await bcrypt.hash(password, 10);
 
   
-
   //creating a new instance of User model
   const user = new User ({
     firstName, 
     emailId, 
     password : hashPassword,
     lastName,
-    skills,
-    age,
-    gender,
-    about
   } );
 
   //saving the user
-  await user.save();
-  res.send("user added successfully");
+  const savedUser = await user.save();
+  const token = await savedUser.getJWT();
+  res.cookie("token", token )
+
+  res.json( {message : "user added successfully" , data : savedUser});
 
   }
   catch(err){
@@ -60,11 +58,11 @@ try{
 
         res.cookie("token", token )
     }
-    res.send(user);
+    res.status(200).send(user);
       
   }
   catch(err){
-    res.send("Something went wrong " + err.message);
+    res.status(401).send("Something went wrong " + err.message);
   }
 
 });

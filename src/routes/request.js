@@ -99,7 +99,7 @@ requestRouter.post("/request/review/:status/:requestId", loginAuth, async(req,re
 
     const data = await connection.save();
     
-    res.json( {message : data});
+    res.json( {message : "connection request" , data});
 
 
  }

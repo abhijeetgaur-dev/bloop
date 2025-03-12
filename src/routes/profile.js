@@ -11,7 +11,7 @@ profileRouter.get("/profile/view",loginAuth ,async (req,res) =>{
       res.send(user);
   }
   catch(err){
-      res.send("Something went wrong " + err.message);
+      res.status(400).send("Something went wrong " + err.message);
   }
 
 });
@@ -31,10 +31,11 @@ profileRouter.patch("/profile/edit", loginAuth, async (req, res) =>{
 
     await loggedInUser.save();
 
-    res.send(`${loggedInUser.firstName} your was updated successfully!`);
+    res.send({message : `${loggedInUser.firstName} your was updated successfully!`,
+              data : loggedInUser});
   }
   catch(err){
-    res.send("Something Went Wrong " + err);
+    res.status(401).send("Something Went Wrong " + err);
   }
 })
 
