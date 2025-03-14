@@ -6,8 +6,8 @@ const User = require("../models/user");
 const userRouter = express.Router();
 
 userRouter.get("/user/requests/recieved",loginAuth ,async (req,res)=>{
-  const user = req.user;
-    try{
+  try{
+      const user = req.user;
       const connectionRequests =  await ConnectionRequest.find({
         toUserId : user._id,
         status: "interested",
@@ -18,7 +18,7 @@ userRouter.get("/user/requests/recieved",loginAuth ,async (req,res)=>{
         data :connectionRequests});
 
     }catch(err){
-      res.status(400).send("Something Went Wrong : "+err);
+      res.status(400).send("Something Went Wrong : "+err.message);
     }
 })
 
@@ -30,7 +30,6 @@ userRouter.get("/user/connections", loginAuth, async (req,res)=>{
           {toUserId: loggedInUser._id, status: "accepted"},
           {fromUserId: loggedInUser._id, status: "accepted"},
         ]
-        
       }).populate("fromUserId","firstName lastName photoUrl age gender about skills")
         .populate("toUserId","firstName lastName photoUrl age gender about skills");
 
@@ -41,10 +40,10 @@ userRouter.get("/user/connections", loginAuth, async (req,res)=>{
           return row.fromUserId;
       })
       
-      res.status(200).json({message : "Connections retrieved successfully", data : data });
+      res.status(200).json({ data });
 
     }catch(err){
-      res.status(400).send("ERR occured :" + err);
+      res.status(400).send("ERR occured :" + err.message);
     }
 })
 

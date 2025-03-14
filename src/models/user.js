@@ -74,7 +74,7 @@ const userSchema = new Schema ({
 
 userSchema.methods.getJWT = async function  () {
     const user = this;
-    const token  = await jwt.sign({_id : user._id} , "BLoop13%9");
+    const token  = await jwt.sign({_id : user._id} , process.env.JWT_SECRET);
     return token;
 }
 

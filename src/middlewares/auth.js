@@ -8,13 +8,9 @@ const loginAuth =  async (req, res, next)=>{
         if(!token){
             return res.status(401).send("Please Login!");
         }
-        const tokenValue = await jwt.verify(token, "BLoop13%9");  
-
-        if(!tokenValue){
-            throw new Error("Invalid Token!");
-        }
-
-        const {_id} = tokenValue;
+        const decodedObj = await jwt.verify(token, process.env.JWT_SECRET);  
+        
+        const { _id } = decodedObj;
         
         const user = await User.findById(_id);
         

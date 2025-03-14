@@ -43,22 +43,21 @@ try{
     const {emailId, password} = req.body;
     const user = await User.findOne({emailId : emailId});
 
-
     if(!user){
         throw new Error ("Invalid Credentials!");
     }
 
     const checkPass = await user.validatePass(password);
 
-    if(!checkPass){
-        throw new Error ("Invalid Credentials");
+    if (checkPass) {
+      const token = await user.getJWT();
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 8 * 3600000),
+      });
+      res.send(user);
+    } else {
+      throw new Error("Invalid credentials");
     }
-    else{
-        const token = await user.getJWT();
-
-        res.cookie("token", token )
-    }
-    res.status(200).send(user);
       
   }
   catch(err){
@@ -72,7 +71,7 @@ authRouter.post("/logout", async (req,res) =>{
   res.cookie("token", null , {
     expires : new Date (Date.now())
   })
-  .send("User Logged Out");
+  .send("Log Out Successfull");
 });
 
 

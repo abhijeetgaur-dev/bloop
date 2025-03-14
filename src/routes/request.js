@@ -1,20 +1,31 @@
+const express = require("express")
+const requestRouter = express.Router();
+
 const mongoose= require("mongoose");
 const { loginAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connectionRequest")
 const User = require("../models/user")
+const sendEmail = require("../utils/sendEmail")
 
-const express = require("express")
 
-const requestRouter = express.Router();
 
 requestRouter.post("/request/send/:status/:userId", loginAuth,async (req, res) =>{
   try{
     const fromUserId = req.user._id;
     const toUserId = req.params.userId;
     const status = req.params.status;
-  
+
+    const allowedStatus = ["ignored", "interested"];
+    
+    if(!allowedStatus.includes(status)){
+      return res.status(400)
+      .json({messsage : "INVALID STATUS : " + status})
+    }
+
     //is to user Valid?
     const isToUserIdValid = await User.findById(toUserId);
+
+
 
     if(!isToUserIdValid){
       return res
@@ -22,12 +33,7 @@ requestRouter.post("/request/send/:status/:userId", loginAuth,async (req, res) =
             .json({message: "INVALID USER ID"});
     }
 
-    const isStatusValid = ["ignored", "interested"];
-    
-    if(!isStatusValid.includes(status)){
-      return res.status(400)
-      .json({messsage : "INVALID STATUS : " + status})
-    }
+
 
     //check for dupicate connection request
     const isConnectionRequestDupicate = await ConnectionRequest.findOne({
@@ -43,7 +49,7 @@ requestRouter.post("/request/send/:status/:userId", loginAuth,async (req, res) =
     if(isConnectionRequestDupicate){
       return res
             .status(400)
-            .json({message : "DUPLICATE CONNECTION REQUEST"});
+            .json({message : "Connection Request Already Exists"});
     }
 
     const connectionRequest = new ConnectionRequest({
@@ -53,6 +59,9 @@ requestRouter.post("/request/send/:status/:userId", loginAuth,async (req, res) =
     })
 
     const data = await connectionRequest.save();
+    
+    const emailRes = await sendEmail.run(`Friend request from ${req.user.firstName}`,`${isToUserIdValid.firstName}, You have recieved a new friend request from ${req.user.firstName}`);
+
 
     res.status(200).json({
       message : "Request Sent",
@@ -60,47 +69,36 @@ requestRouter.post("/request/send/:status/:userId", loginAuth,async (req, res) =
     })
   }
   catch(err){
-    res.send("Something Went Wrong! " + err);
+    res.status(400).send("Something Went Wrong! " + err);
   }
 })
 
 requestRouter.post("/request/review/:status/:requestId", loginAuth, async(req,res)=>{
- try{
-    const allowedStatus = ["accepted" , "rejected"];
-    const status = req.params.status;
-    const requestId = req.params.requestId;
-    const loggedInUserId = req.user._id;
+  try {
+    const loggedInUser = req.user;
+    const { status, requestId } = req.params;
 
-
-    if(!allowedStatus.includes(status)){
-      res
-        .status(400)
-        .json({message : "Invalid Status Type!"});
+    const allowedStatus = ["accepted", "rejected"];
+    if (!allowedStatus.includes(status)) {
+      return res.status(400).json({ messaage: "Status not allowed!" });
     }
 
-    //checking if the request id is valid
-    const findUserConnection = await User.findById(requestId);
-
-    if(!findUserConnection){
-      res.status(400)
-      .json({message : "Invalid Request ID!"})
+    const connectionRequest = await ConnectionRequest.findOne({
+      _id: requestId,
+      toUserId: loggedInUser._id,
+      status: "interested",
+    });
+    if (!connectionRequest) {
+      return res
+        .status(404)
+        .json({ message: "Connection request not found" });
     }
 
-    //getting the request
-    const connection = await ConnectionRequest.findOne({fromUserId: requestId, toUserId: loggedInUserId, status: "interested" });
+    connectionRequest.status = status;
 
-    if(!connection){
-      res.
-        status(400).
-        json({message : "Conection Not Found"});
-    }
+    const data = await connectionRequest.save();
 
-    connection.status = status;
-
-    const data = await connection.save();
-    
-    res.json( {message : "connection request" , data});
-
+    res.json({ message: "Connection request " + status, data });
 
  }
  catch(err){

@@ -3,6 +3,7 @@ const {loginAuth} = require("../middlewares/auth");
 const {validateEditProfileData, validateEditPasswordData} = require("../utils/validation");
 const bcrypt = require("bcrypt");
 
+
 const profileRouter = express.Router();
 
 profileRouter.get("/profile/view",loginAuth ,async (req,res) =>{
@@ -31,7 +32,7 @@ profileRouter.patch("/profile/edit", loginAuth, async (req, res) =>{
 
     await loggedInUser.save();
 
-    res.send({message : `${loggedInUser.firstName} your was updated successfully!`,
+    res.send({message : `${loggedInUser.firstName} your data was updated successfully!`,
               data : loggedInUser});
   }
   catch(err){
